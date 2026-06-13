@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d136a7c7-4870-4f8e-b764-7aad735f1c12" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/app/api/telegram/webhook/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/dashboard/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/checkReelUrl.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/checkUrl.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/HomePage/HomePage.tsx" beforeDir="false" />
-    </list>
+    <list default="true" id="d136a7c7-4870-4f8e-b764-7aad735f1c12" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -60,7 +52,7 @@
       <option name="presentableId" value="Default" />
       <updated>1781343445128</updated>
       <workItem from="1781343446426" duration="1964000" />
-      <workItem from="1781345474679" duration="8446000" />
+      <workItem from="1781345474679" duration="8612000" />
     </task>
     <servers />
   </component>
