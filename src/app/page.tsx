@@ -1,7 +1,10 @@
-import {HomePage} from '@/pages/HomePage/HomePage';
-
 export default function Home() {
   return (
-    <HomePage />
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main>
+      Всем привет)
+      Мы начинаем проект!
+      </main>
+    </div>
   );
 }
