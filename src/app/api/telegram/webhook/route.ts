@@ -1,23 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {checkReelUrl} from '@/lib/checkReelUrl';
 import {checkUrl} from '@/lib/checkUrl';
-
-async function sendMessage(chatId: number, text: string) {
-  await fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-    }),
-  })
-}
+import {ITelegramUser} from '@/types/telegram';
+import {createUser} from '@/features/user/api/createUser';
+import {sendMessage} from '@/lib/telegram/sendMesssage';
+import {getUserByTelegramId} from '@/features/user/api/getUserByTelegramId';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  console.log(body);
   const message = body.message;
 
   if (!message) {
@@ -25,21 +15,51 @@ export async function POST(req: NextRequest) {
   }
 
   const chatId = message.chat.id;
+  const telegramUser: ITelegramUser = message.from;
 
+  // Команда регистрации
   if (message.text === '/start') {
-    await sendMessage(chatId, `Добро пожаловать в Clipsy, ${message.from.first_name}. Теперь ты можешь отправлять мне ссылки на видео, а я буду сохранять твои лучшие идеи`);
-  } else if (checkUrl(message.text)) {
+    try {
+      await createUser(telegramUser);
 
+      await sendMessage(
+        chatId,
+        `Добро пожаловать в Clipsy, ${telegramUser.first_name}. Теперь ты можешь отправлять мне ссылки на видео, а я буду сохранять твои лучшие идеи`
+      );
+    } catch (err) {
+      console.error(err);
+      await sendMessage(chatId, 'Ошибка при регистрации');
+    }
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // Проверяем зарегистрирован ли пользователь
+  const user = await getUserByTelegramId(telegramUser.id);
+  console.log(user);
+
+  if (!user) {
+    await sendMessage(
+      chatId,
+      'Ты ещё не зарегистрирован. Напиши команду /start'
+    );
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // Основная логика
+  if (checkUrl(message.text)) {
     const isReelUrl = checkReelUrl(message.text);
-    await sendMessage(chatId, isReelUrl ? `Сохранил видео идею` : 'Это не Reel url');
 
+    await sendMessage(
+      chatId,
+      isReelUrl ? 'Сохранил видео идею' : 'Это не Reel url'
+    );
   } else {
-    await sendMessage(chatId, `Не понимаю тебя`);
+    await sendMessage(chatId, 'Отправь пожалуйста ссылку на видео');
   }
 
   return NextResponse.json({ ok: true });
 }
 
-// Установка Вебхука
-
-// https://api.telegram.org/bot8831308691:AAHPTiczI15VEpa8Njs4ha-vtVFf09sDORY/setWebhook?url=https://cc41-185-191-119-118.ngrok-free.app/api/telegram/webhook
+// https://api.telegram.org/bot8831308691:AAHPTiczI15VEpa8Njs4ha-vtVFf09sDORY/setWebhook?url=https://d133-185-191-119-118.ngrok-free.app/api/telegram/webhook
