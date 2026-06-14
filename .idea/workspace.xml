@@ -5,17 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d136a7c7-4870-4f8e-b764-7aad735f1c12" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/features/user/api/createUser.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/features/user/api/getUserByTelegramId.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/prisma.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/telegram/sendMesssage.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/telegram.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/entities/reels/api/saveReel.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/entities/user/api/updateUserState.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/entities/user/types.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/telegram/answerCallbackQuery.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/telegram/editMessageReplyMarkup.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/telegram/webhook/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/telegram/webhook/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/user/api/createUser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/user/api/createUser.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/user/api/getUserByTelegramId.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/user/api/getUserByTelegramId.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/telegram/sendMesssage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/telegram/sendMesssage.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/telegram.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/telegram.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +58,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/entities/reels/api" />
+      <recent name="$PROJECT_DIR$/src/features/user" />
       <recent name="$PROJECT_DIR$/src/types" />
     </key>
   </component>
@@ -78,7 +81,8 @@
       <workItem from="1781343446426" duration="1964000" />
       <workItem from="1781345474679" duration="8612000" />
       <workItem from="1781354150959" duration="8664000" />
-      <workItem from="1781428574800" duration="3851000" />
+      <workItem from="1781428574800" duration="14010000" />
+      <workItem from="1781442752046" duration="6945000" />
     </task>
     <servers />
   </component>

@@ -1,65 +1,184 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {checkReelUrl} from '@/lib/checkReelUrl';
 import {checkUrl} from '@/lib/checkUrl';
-import {ITelegramUser} from '@/types/telegram';
-import {createUser} from '@/features/user/api/createUser';
+import {NoteAnswer} from '@/types/telegram';
+import {createUser} from '@/entities/user/api/createUser';
 import {sendMessage} from '@/lib/telegram/sendMesssage';
-import {getUserByTelegramId} from '@/features/user/api/getUserByTelegramId';
+import {getUserByTelegramId} from '@/entities/user/api/getUserByTelegramId';
+import {updateUserState} from '@/entities/user/api/updateUserState';
+import {answerCallbackQuery} from '@/lib/telegram/answerCallbackQuery';
+import {UserFlowState} from '@/entities/user/types';
+import {saveReel} from '@/entities/reels/api/saveReel';
+import {editMessageReplyMarkup} from '@/lib/telegram/editMessageReplyMarkup';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const message = body.message;
+  console.log(body);
 
+  const message = body.message;
+  const callback = body.callback_query;
+
+  // =========================
+  // CALLBACK HANDLER
+  // =========================
+  if (callback) {
+    const chatId = callback.message.chat.id;
+    const messageId = callback.message.message_id;
+    const telegramId = callback.from.id.toString();
+
+    const user = await getUserByTelegramId(telegramId);
+    if (!user) return NextResponse.json({ ok: true });
+
+    if (callback.data === NoteAnswer.NO_NOTE) {
+      await saveReel({
+        userId: user.id,
+        url: user.pendingReelUrl!,
+      });
+
+      await updateUserState(telegramId, {
+        pendingReelUrl: null,
+        flowState: UserFlowState.IDLE,
+      });
+
+      await sendMessage({
+        chatId,
+        text: "Reel сохранён без заметки",
+      });
+    }
+
+    if (callback.data === NoteAnswer.YES_NOTE) {
+      await updateUserState(telegramId, {
+        flowState: UserFlowState.WAITING_NOTE_TEXT,
+      });
+
+      await sendMessage({
+        chatId,
+        text: "Напиши заметку к видео",
+      });
+    }
+
+    console.log("ВЫЗВАЛСЯ");
+    const x = await editMessageReplyMarkup({chatId, messageId, replyMarkup: {inline_keyboard: []}});
+    console.log('ОТВЕТ ---------------------------------------------');
+    console.log(x);
+
+    await answerCallbackQuery(callback.id);
+    return NextResponse.json({ ok: true });
+  }
+
+  // =========================
+  // MESSAGE HANDLER
+  // =========================
   if (!message) {
     return NextResponse.json({ ok: true });
   }
 
   const chatId = message.chat.id;
-  const telegramUser: ITelegramUser = message.from;
+  const telegramId = message.from.id.toString();
+  const text = message.text;
 
-  // Команда регистрации
-  if (message.text === '/start') {
-    try {
-      await createUser(telegramUser);
+  // -------------------------
+  // START (REGISTRATION)
+  // -------------------------
+  if (text === "/start") {
+    await createUser(message.from);
 
-      await sendMessage(
-        chatId,
-        `Добро пожаловать в Clipsy, ${telegramUser.first_name}. Теперь ты можешь отправлять мне ссылки на видео, а я буду сохранять твои лучшие идеи`
-      );
-    } catch (err) {
-      console.error(err);
-      await sendMessage(chatId, 'Ошибка при регистрации');
-    }
+    await sendMessage({
+      chatId,
+      text: `Добро пожаловать, ${message.from.first_name}`,
+    });
 
     return NextResponse.json({ ok: true });
   }
 
-  // Проверяем зарегистрирован ли пользователь
-  const user = await getUserByTelegramId(telegramUser.id);
-  console.log(user);
+  const user = await getUserByTelegramId(telegramId);
 
   if (!user) {
-    await sendMessage(
+    await sendMessage({
       chatId,
-      'Ты ещё не зарегистрирован. Напиши команду /start'
-    );
+      text: "Ты не зарегистрирован. Напиши /start",
+    });
 
     return NextResponse.json({ ok: true });
   }
 
-  // Основная логика
-  if (checkUrl(message.text)) {
-    const isReelUrl = checkReelUrl(message.text);
+  // -------------------------
+  // RESET (DEV)
+  // -------------------------
+  if (text === "/reset") {
+    await updateUserState(telegramId, {
+      pendingReelUrl: null,
+      flowState: UserFlowState.IDLE,
+    });
 
-    await sendMessage(
+    await sendMessage({
       chatId,
-      isReelUrl ? 'Сохранил видео идею' : 'Это не Reel url'
-    );
-  } else {
-    await sendMessage(chatId, 'Отправь пожалуйста ссылку на видео');
+      text: "Сбросил состояние",
+    });
+
+    return NextResponse.json({ ok: true });
   }
+
+  // -------------------------
+  // WAITING NOTE TEXT STATE
+  // -------------------------
+  if (user.flowState === UserFlowState.WAITING_NOTE_TEXT) {
+    await saveReel({
+      userId: user.id,
+      url: user.pendingReelUrl!,
+      note: text,
+    });
+
+    await updateUserState(telegramId, {
+      pendingReelUrl: null,
+      flowState: UserFlowState.IDLE,
+    });
+
+    await sendMessage({
+      chatId,
+      text: "Заметка сохранена",
+    });
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // -------------------------
+  // URL HANDLING
+  // -------------------------
+  if (checkUrl(text)) {
+    if (!checkReelUrl(text)) {
+      await sendMessage({ chatId, text: "Это не Reel url" });
+      return NextResponse.json({ ok: true });
+    }
+
+    await updateUserState(telegramId, {
+      pendingReelUrl: text,
+      flowState: UserFlowState.WAITING_NOTE_DECISION,
+    });
+
+    await sendMessage({
+      chatId,
+      text: "Хочешь оставить заметку?",
+      replyMarkup: {
+        inline_keyboard: [
+          [
+            { text: "Да", callback_data: NoteAnswer.YES_NOTE },
+            { text: "Нет", callback_data: NoteAnswer.NO_NOTE },
+          ],
+        ],
+      },
+    });
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // -------------------------
+  // DEFAULT
+  // -------------------------
+  await sendMessage({
+    chatId,
+    text: "Отправь ссылку на видео",
+  });
 
   return NextResponse.json({ ok: true });
 }
-
-// https://api.telegram.org/bot8831308691:AAHPTiczI15VEpa8Njs4ha-vtVFf09sDORY/setWebhook?url=https://d133-185-191-119-118.ngrok-free.app/api/telegram/webhook
